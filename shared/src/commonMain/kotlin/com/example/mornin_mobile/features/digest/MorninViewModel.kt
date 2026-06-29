@@ -7,6 +7,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.mornin_mobile.MorninState
 import com.example.mornin_mobile.domain.GetDigestForToday
+import com.example.mornin_mobile.domain.exception.NoDigestsFoundException
+import com.example.mornin_mobile.domain.exception.UnauthorizedException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -26,11 +28,14 @@ class MorninViewModel(
          _morninState.value = MorninState.Loading()
 
          viewModelScope.launch {
-             _morninState.value = runCatching {
-                 val digest = getDigestForToday.execute()
-                 MorninState.Loaded(digest.articles)
-             }.getOrElse {
-                 MorninState.Error(it.message ?: "Something went wrong")
+             _morninState.value = try {
+                 MorninState.Loaded(getDigestForToday.execute().articles)
+             } catch (e: UnauthorizedException) {
+                 MorninState.Error("Session expired. Please sign in again.")
+             } catch (e: NoDigestsFoundException) {
+                 MorninState.Error("No digests found for today")
+             } catch (e: Exception) {
+                 MorninState.Error(e.message ?: "Something went wrong")
              }
          }
      }
