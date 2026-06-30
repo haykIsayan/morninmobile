@@ -19,13 +19,18 @@ import com.example.mornin_mobile.data.local.TokenStorage
 import com.example.mornin_mobile.data.remote.AuthRepositoryImpl
 import com.example.mornin_mobile.data.remote.DigestRepositoryImpl
 import com.example.mornin_mobile.data.remote.HttpClientFactory
+import com.example.mornin_mobile.data.remote.TopicsRepositoryImpl
 import com.example.mornin_mobile.domain.GetDigestForToday
 import com.example.mornin_mobile.domain.RequestOtpUseCase
 import com.example.mornin_mobile.domain.SaveTokenUseCase
 import com.example.mornin_mobile.domain.VerifyOtpUseCase
+import com.example.mornin_mobile.domain.topics.CreateTopicUseCase
+import com.example.mornin_mobile.domain.topics.DeleteTopicUseCase
+import com.example.mornin_mobile.domain.topics.GetTopicsUseCase
 import com.example.mornin_mobile.features.auth.AuthScreen
 import com.example.mornin_mobile.features.auth.AuthViewModel
 import com.example.mornin_mobile.features.digest.MorninViewModel
+import com.example.mornin_mobile.features.topics.TopicsViewModel
 
 private const val BASE_URL = "https://mornin-digest-staging.up.railway.app"
 
@@ -65,6 +70,16 @@ fun App(tokenStorage: TokenStorage) {
             }
 
             composable<AppRoute.Mornin> {
+                val topicsRepo = remember { TopicsRepositoryImpl(httpClient, BASE_URL) }
+
+                val topicsViewModel: TopicsViewModel = viewModel(
+                    factory = TopicsViewModel.factory(
+                        getTopicsUseCase = GetTopicsUseCase(topicsRepo),
+                        createTopicUseCase = CreateTopicUseCase(topicsRepo),
+                        deleteTopicUseCase = DeleteTopicUseCase(topicsRepo)
+                    )
+                )
+
                 val morninViewModel: MorninViewModel = viewModel(
                     factory = MorninViewModel.factory(
                         GetDigestForToday(DigestRepositoryImpl(httpClient, BASE_URL))
@@ -83,8 +98,12 @@ fun App(tokenStorage: TokenStorage) {
                                 .padding(16.dp)
                         )
                     }
-                ) {
-                    MorninScreen(viewModel = morninViewModel)
+                ) { innerPadding ->
+                    MorninScreen(
+                        topicsViewModel = topicsViewModel,
+                        morninViewModel = morninViewModel,
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }

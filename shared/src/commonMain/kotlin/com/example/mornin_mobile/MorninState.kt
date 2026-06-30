@@ -12,6 +12,8 @@ sealed interface MorninState {
         val articles: List<ArticleEntity> = emptyList()
     ): MorninState
 
+    object NoDigestFound: MorninState
+
     data class Error(
         val message: String
     ): MorninState

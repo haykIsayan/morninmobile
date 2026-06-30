@@ -33,7 +33,7 @@ class MorninViewModel(
              } catch (e: UnauthorizedException) {
                  MorninState.Error("Session expired. Please sign in again.")
              } catch (e: NoDigestsFoundException) {
-                 MorninState.Error("No digests found for today")
+                    MorninState.NoDigestFound
              } catch (e: Exception) {
                  MorninState.Error(e.message ?: "Something went wrong")
              }

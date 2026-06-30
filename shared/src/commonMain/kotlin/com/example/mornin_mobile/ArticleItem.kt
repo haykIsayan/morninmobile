@@ -26,7 +26,7 @@ fun ArticleItem(index: Int, article: ArticleEntity) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 18.dp)
+                .padding(horizontal = 16.dp, vertical = 18.dp)
         ) {
             // ── kicker: "02 · TECH" ──────────────────────────
             Text(
